@@ -4,7 +4,7 @@ terraform {
   required_providers {
     aws        = ">= 4.22.0"
     http       = ">= 2.2.0"
-    template   = ">= 2.2.0"
+    #template   = ">= 2.2.0"
     kubernetes = "~> 2.12.1"
   }
 }
