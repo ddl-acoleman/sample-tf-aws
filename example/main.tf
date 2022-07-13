@@ -3,7 +3,7 @@ provider "aws" {
 }
 
 module "eks_cluster" {
-  source = "git::https://github.com/cerebrotech/sample-terraform-eks-domino"
+  source = "git::https://github.com/ddl-acoleman/sample-tf-aws"
 
   name        = "ddl-frbny"
   root_domain = "ddl-frbny.cs.domino.tech"
