@@ -176,38 +176,38 @@ data "aws_ami" "gpu_node" {
   owners      = var.amis.eks_gpu.owners # Amazon EKS AMI Account ID
 }
 
-data "template_file" "platform" {
-  template = file("${path.module}/templates/user_data.sh.tpl")
-  vars = {
-    apiserver_endpoint   = aws_eks_cluster.this.endpoint
-    cluster_ca           = aws_eks_cluster.this.certificate_authority.0.data
-    name                 = var.name
-    kubelet_extra_args   = "--node-labels=dominodatalab.com/node-pool=platform"
-    enable_docker_bridge = true
-  }
-}
-
-data "template_file" "compute" {
-  template = file("${path.module}/templates/user_data.sh.tpl")
-  vars = {
-    apiserver_endpoint   = aws_eks_cluster.this.endpoint
-    cluster_ca           = aws_eks_cluster.this.certificate_authority.0.data
-    name                 = var.name
-    kubelet_extra_args   = "--node-labels=dominodatalab.com/node-pool=default,domino/build-node=true"
-    enable_docker_bridge = true
-  }
-}
-
-data "template_file" "gpu" {
-  template = file("${path.module}/templates/user_data.sh.tpl")
-  vars = {
-    apiserver_endpoint   = aws_eks_cluster.this.endpoint
-    cluster_ca           = aws_eks_cluster.this.certificate_authority.0.data
-    name                 = var.name
-    kubelet_extra_args   = "--node-labels=dominodatalab.com/node-pool=default-gpu,nvidia.com/gpu=true --register-with-taints=nvidia.com/gpu=true:NoExecute"
-    enable_docker_bridge = false
-  }
-}
+# data "template_file" "platform" {
+#   template = file("${path.module}/templates/user_data.sh.tpl")
+#   vars = {
+#     apiserver_endpoint   = aws_eks_cluster.this.endpoint
+#     cluster_ca           = aws_eks_cluster.this.certificate_authority.0.data
+#     name                 = var.name
+#     kubelet_extra_args   = "--node-labels=dominodatalab.com/node-pool=platform"
+#     enable_docker_bridge = true
+#   }
+# }
+# 
+# data "template_file" "compute" {
+#   template = file("${path.module}/templates/user_data.sh.tpl")
+#   vars = {
+#     apiserver_endpoint   = aws_eks_cluster.this.endpoint
+#     cluster_ca           = aws_eks_cluster.this.certificate_authority.0.data
+#     name                 = var.name
+#     kubelet_extra_args   = "--node-labels=dominodatalab.com/node-pool=default,domino/build-node=true"
+#     enable_docker_bridge = true
+#   }
+# }
+# 
+# data "template_file" "gpu" {
+#   template = file("${path.module}/templates/user_data.sh.tpl")
+#   vars = {
+#     apiserver_endpoint   = aws_eks_cluster.this.endpoint
+#     cluster_ca           = aws_eks_cluster.this.certificate_authority.0.data
+#     name                 = var.name
+#     kubelet_extra_args   = "--node-labels=dominodatalab.com/node-pool=default-gpu,nvidia.com/gpu=true --register-with-taints=nvidia.com/gpu=true:NoExecute"
+#     enable_docker_bridge = false
+#   }
+# }
 
 resource "aws_launch_configuration" "platform" {
   associate_public_ip_address = false
@@ -216,7 +216,14 @@ resource "aws_launch_configuration" "platform" {
   instance_type               = var.autoscaling_groups.platform.instance_type
   name_prefix                 = "${var.name}-platform-"
   security_groups             = [aws_security_group.nodes.id]
-  user_data_base64            = base64encode(data.template_file.platform.rendered)
+  #user_data_base64            = base64encode(data.template_file.platform.rendered)
+  user_data_base64 = base64encode(templatefile("${path.module}/templates/user_data.sh.tpl",
+    { apiserver_endpoint   = aws_eks_cluster.this.endpoint,
+      cluster_ca           = aws_eks_cluster.this.certificate_authority.0.data,
+      name                 = var.name,
+      kubelet_extra_args   = "--node-labels=dominodatalab.com/node-pool=platform",
+      enable_docker_bridge = true
+  }))
   root_block_device {
     volume_size           = 200
     delete_on_termination = true
@@ -268,7 +275,14 @@ resource "aws_launch_configuration" "compute" {
   instance_type        = var.autoscaling_groups.compute.instance_type
   name_prefix          = "${var.name}-compute-"
   security_groups      = [aws_security_group.nodes.id]
-  user_data_base64     = base64encode(data.template_file.compute.rendered)
+  #user_data_base64     = base64encode(data.template_file.compute.rendered)
+  user_data_base64 = base64encode(templatefile("${path.module}/templates/user_data.sh.tpl",
+    { apiserver_endpoint   = aws_eks_cluster.this.endpoint,
+      cluster_ca           = aws_eks_cluster.this.certificate_authority.0.data,
+      name                 = var.name,
+      kubelet_extra_args   = "--node-labels=dominodatalab.com/node-pool=default,domino/build-node=true"
+      enable_docker_bridge = true
+  }))
 
   root_block_device {
     volume_size           = 200
@@ -337,7 +351,14 @@ resource "aws_launch_configuration" "gpu" {
   instance_type        = var.autoscaling_groups.gpu.instance_type
   name_prefix          = "${var.name}-gpu-"
   security_groups      = [aws_security_group.nodes.id]
-  user_data_base64     = base64encode(data.template_file.gpu.rendered)
+  #user_data_base64     = base64encode(data.template_file.gpu.rendered)
+  user_data_base64 = base64encode(templatefile("${path.module}/templates/user_data.sh.tpl",
+    { apiserver_endpoint   = aws_eks_cluster.this.endpoint,
+      cluster_ca           = aws_eks_cluster.this.certificate_authority.0.data,
+      name                 = var.name,
+      kubelet_extra_args   = "--node-labels=dominodatalab.com/node-pool=default-gpu,nvidia.com/gpu=true --register-with-taints=nvidia.com/gpu=true:NoExecute"
+      enable_docker_bridge = false
+  }))
 
   root_block_device {
     volume_size           = 200
