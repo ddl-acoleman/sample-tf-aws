@@ -25,6 +25,15 @@ resource "aws_s3_bucket" "backups_bucket" {
   }
 }
 
+resource "aws_s3_bucket" "registry_bucket" {
+  bucket        = "${lower(var.name)}-registry"
+  force_destroy = true
+
+  tags = {
+    Name = "${lower(var.name)}-registry"
+  }
+}
+
 data "aws_iam_policy_document" "s3_bucket_access" {
   statement {
     actions = [
@@ -36,7 +45,8 @@ data "aws_iam_policy_document" "s3_bucket_access" {
     resources = [
       "arn:aws:s3:::${lower(var.name)}-backups",
       "arn:aws:s3:::${lower(var.name)}-blobs",
-      "arn:aws:s3:::${lower(var.name)}-logs"
+      "arn:aws:s3:::${lower(var.name)}-logs",
+      "arn:aws:s3:::${lower(var.name)}-registry"
     ]
   }
 
@@ -52,7 +62,8 @@ data "aws_iam_policy_document" "s3_bucket_access" {
     resources = [
       "arn:aws:s3:::${lower(var.name)}-backups/*",
       "arn:aws:s3:::${lower(var.name)}-blobs/*",
-      "arn:aws:s3:::${lower(var.name)}-logs/*"
+      "arn:aws:s3:::${lower(var.name)}-logs/*",
+      "arn:aws:s3:::${lower(var.name)}-registry/*"
     ]
   }
 }

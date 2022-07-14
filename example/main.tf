@@ -6,7 +6,7 @@ module "eks_cluster" {
   source = "git::https://github.com/ddl-acoleman/sample-tf-aws"
 
   name        = "ddl-frbny"
-  root_domain = "ddl-frbny.cs.domino.tech"
+  root_domain = "cs.domino.tech"
 }
 
 output "autoscaling_groups" {
