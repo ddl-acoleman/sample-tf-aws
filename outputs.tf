@@ -31,6 +31,7 @@ output "s3_buckets" {
   value = [
     aws_s3_bucket.blobs_bucket.bucket,
     aws_s3_bucket.logs_bucket.bucket,
-    aws_s3_bucket.backups_bucket.bucket
+    aws_s3_bucket.backups_bucket.bucket,
+    aws_s3_bucket.registry_bucket.bucket
   ]
 }

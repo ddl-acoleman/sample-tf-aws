@@ -2,5 +2,5 @@ example/.terraform
 example/.terraform.lock.hcl
 example/eks-kubeconfig
 example/install/
-example/terraform.tfstate
+example/terraform.tfstate*
 tags
