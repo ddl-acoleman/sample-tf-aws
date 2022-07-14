@@ -99,6 +99,11 @@ resource "aws_iam_role_policy_attachment" "nodes_AmazonElasticFileSystemReadOnly
   role       = aws_iam_role.nodes.name
 }
 
+resource "aws_iam_role_policy_attachment" "nodes_AmazonEBSCSIDriverPolicy" {
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy"
+  role = aws_iam_role.nodes.name
+}
+
 resource "aws_iam_role_policy_attachment" "nodes_s3_bucket_access" {
   policy_arn = aws_iam_policy.s3_bucket_access.arn
   role       = aws_iam_role.nodes.name
@@ -266,6 +271,18 @@ resource "aws_autoscaling_group" "platform" {
     propagate_at_launch = true
     value               = "platform"
   }
+
+  tag {
+    key                 = "k8s.io/cluster-autoscaler/node-template/label/dominodatalab.com/domino-node"
+    propagate_at_launch = true
+    value               = true
+  }
+
+  tag {
+    key                 = "kubernetes.io/cluster/${var.name}"
+    value               = "shared"
+    propagate_at_launch = true
+  }
 }
 
 
@@ -343,6 +360,18 @@ resource "aws_autoscaling_group" "compute" {
     propagate_at_launch = true
     value               = "true"
   }
+
+  tag {
+    key                 = "k8s.io/cluster-autoscaler/node-template/label/dominodatalab.com/domino-node"
+    propagate_at_launch = true
+    value               = true
+  }
+
+  tag {
+    key                 = "kubernetes.io/cluster/${var.name}"
+    value               = "shared"
+    propagate_at_launch = true
+  }
 }
 
 resource "aws_launch_configuration" "gpu" {
@@ -400,5 +429,17 @@ resource "aws_autoscaling_group" "gpu" {
     key                 = "k8s.io/cluster-autoscaler/node-template/label/dominodatalab.com/node-pool"
     propagate_at_launch = true
     value               = "default-gpu"
+  }
+
+  tag {
+    key                 = "k8s.io/cluster-autoscaler/node-template/label/dominodatalab.com/domino-node"
+    propagate_at_launch = true
+    value               = true
+  }
+
+  tag {
+    key                 = "kubernetes.io/cluster/${var.name}"
+    value               = "shared"
+    propagate_at_launch = true
   }
 }
